@@ -15,6 +15,7 @@ namespace ECommerce.Domain.Entities
         private readonly List<OrderItem> _items = new();
 
         // 私有构造函数（EF Core 需要）
+
         private Order() { }
 
         // 工厂方法

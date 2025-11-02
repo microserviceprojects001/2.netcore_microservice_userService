@@ -1,0 +1,73 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Project.Domain.SeedWork
+{
+    public abstract class ValueObject
+    {
+        protected static bool EqualOperator(ValueObject left, ValueObject right)
+        {
+            if (ReferenceEquals(left, null) ^ ReferenceEquals(right, null))
+            {
+                return false;
+            }
+
+            return ReferenceEquals(left, null) || left.Equals(right);
+        }
+
+        protected static bool NotEqualOperator(ValueObject left, ValueObject right)
+        {
+            return !(EqualOperator(left, right));
+        }
+
+        protected abstract IEnumerable<object> GetAtomicValues();
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            var other = (ValueObject)obj;
+
+            var thisValues = GetAtomicValues().GetEnumerator();
+            var otherValues = other.GetAtomicValues().GetEnumerator();
+
+            while (thisValues.MoveNext() && otherValues.MoveNext())
+            {
+                if (ReferenceEquals(thisValues.Current, null) ^ ReferenceEquals(otherValues.Current, null))
+                {
+                    return false;
+                }
+
+                if (thisValues.Current != null && !thisValues.Current.Equals(otherValues.Current))
+                {
+                    return false;
+                }
+            }
+
+            return !thisValues.MoveNext() && !otherValues.MoveNext();
+        }
+
+        public override int GetHashCode()
+        {
+            return GetAtomicValues()
+                .Select(x => x != null ? x.GetHashCode() : 0)
+                .Aggregate((x, y) => x ^ y);
+        }
+
+        public ValueObject Clone()
+        {
+            return (ValueObject)this.MemberwiseClone();
+        }
+        //MemberwiseClone 方法不需要在
+        // ValueObject
+        //  基类中定义，因为它是 object 类的受保护方法，所有类都自动继承了这个方法。
+
+        // MemberwiseClone() 是.NET 中 object 类的内置方法，用于创建当前对象的浅表副本。
+
+    }
+}
