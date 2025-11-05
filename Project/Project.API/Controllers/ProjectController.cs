@@ -43,7 +43,7 @@ public class ProjectController : BaseController
         };
 
         await _mediator.Send(command);
-        return Ok(true);
+        return Ok();
     }
 
     [HttpPut]
@@ -56,6 +56,6 @@ public class ProjectController : BaseController
         };
 
         await _mediator.Send(command);
-        return Ok(true);
+        return Ok();
     }
 }

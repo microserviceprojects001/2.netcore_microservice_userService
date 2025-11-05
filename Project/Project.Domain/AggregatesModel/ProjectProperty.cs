@@ -13,6 +13,7 @@ namespace Project.Domain.AggregatesModel
 
         public string Value { get; set; }
 
+        public int ProjectId { get; set; }
         public ProjectProperty()
         {
 

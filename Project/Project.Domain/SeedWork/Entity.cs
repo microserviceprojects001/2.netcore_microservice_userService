@@ -44,7 +44,7 @@ namespace Project.Domain.SeedWork
 
         public bool IsTransient()
         {
-            return this.Id == default(int);
+            return this.Id == default(Int32);
         }
 
         public override bool Equals(object obj)

@@ -20,7 +20,7 @@ namespace Project.API.Applications.Commands
         {
             // Implementation for creating an order goes here.
             await _projectRepository.AddAsync(request.Project);
-            await _projectRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+            await _projectRepository.UnitOfWork.SaveEntitiesAsync();
             return request.Project;
         }
     }
