@@ -2,6 +2,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using MediatR;
 using System.Reflection;
+using Project.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +16,20 @@ builder.Services.AddOpenApi();
 // 明确指定包含 MediatR 处理程序的程序集
 // MediatR 11.0 及更早版本的注册方式
 builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
+
+var connectionString = builder.Configuration.GetConnectionString("MySQLProject");
+Console.WriteLine($"DB Server: {connectionString}");
+
+builder.Services.AddInfrastructure(builder.Configuration); // Infrastructure 扩展
+
+// builder.Services.AddDbContext<ProjectContext>(options =>
+// {
+//     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
+//         mysqlOptions =>
+//         {
+//             mysqlOptions.MigrationsAssembly(typeof(ProjectContext).Assembly.FullName);
+//         });
+// });
 
 var app = builder.Build();
 

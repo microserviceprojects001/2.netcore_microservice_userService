@@ -14,6 +14,7 @@ namespace Project.Infrastructure
 
         public DbSet<Domain.AggregatesModel.Project> Projects { get; set; }
 
+        // 只保留这一个构造函数
         public ProjectContext(DbContextOptions<ProjectContext> options, IMediator mediator) : base(options)
         {
             _mediator = mediator;
