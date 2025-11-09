@@ -22,14 +22,6 @@ Console.WriteLine($"DB Server: {connectionString}");
 
 builder.Services.AddInfrastructure(builder.Configuration); // Infrastructure 扩展
 
-// builder.Services.AddDbContext<ProjectContext>(options =>
-// {
-//     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
-//         mysqlOptions =>
-//         {
-//             mysqlOptions.MigrationsAssembly(typeof(ProjectContext).Assembly.FullName);
-//         });
-// });
 
 var app = builder.Build();
 
