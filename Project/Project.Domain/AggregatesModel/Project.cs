@@ -86,6 +86,8 @@ namespace Project.Domain.AggregatesModel
         /// 
         /// </summary>
         public string FinStage { get; set; }
+
+        public decimal FinMoney { get; set; }
         /// <summary>
         /// 收入单位(万)
         /// </summary>
@@ -98,6 +100,8 @@ namespace Project.Domain.AggregatesModel
         /// 估值 单位（万）
         /// </summary>
         public int Valuation { get; set; }
+
+        public string UserName { get; set; }
         /// <summary>
         /// 佣金分配方式
         /// </summary>

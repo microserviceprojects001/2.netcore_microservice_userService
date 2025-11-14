@@ -107,6 +107,28 @@
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development" // 强制使用 Development 环境
             }
+        },
+          {
+            "name": "Run Project.API",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "Project.API", // 关键！调用 tasks.json 中的 "build" 任务
+            "program": "${workspaceFolder}\\Project\\Project.API\\bin\\Debug\\net9.0\\Project.API.dll", // 直接指定DLL
+            "args": [],
+            "cwd": "${workspaceFolder}/Project/Project.API",
+            "console": "integratedTerminal",
+            "symbolOptions": {
+                "searchPaths": [
+                    "${workspaceFolder}\\Project\\Project.API\\bin\\Debug\\net9.0" // 改为单层目录
+                ],
+                "searchMicrosoftSymbolServer": true
+            },
+            "logging": {
+                "moduleLoad": true
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development" // 强制使用 Development 环境
+            }
         }
     ]
 }

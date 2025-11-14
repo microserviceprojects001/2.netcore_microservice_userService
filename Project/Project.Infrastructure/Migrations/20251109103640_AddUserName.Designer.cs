@@ -11,8 +11,8 @@ using Project.Infrastructure;
 namespace Project.Infrastructure.Migrations
 {
     [DbContext(typeof(ProjectContext))]
-    [Migration("20251108110106_initProjectDb")]
-    partial class initProjectDb
+    [Migration("20251109103640_AddUserName")]
+    partial class AddUserName
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -55,6 +55,9 @@ namespace Project.Infrastructure.Migrations
 
                     b.Property<DateTime>("CreateTime")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<decimal>("FinMoney")
+                        .HasColumnType("decimal(65,30)");
 
                     b.Property<string>("FinPercentage")
                         .IsRequired()
@@ -113,6 +116,10 @@ namespace Project.Infrastructure.Migrations
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Valuation")
                         .HasColumnType("int");

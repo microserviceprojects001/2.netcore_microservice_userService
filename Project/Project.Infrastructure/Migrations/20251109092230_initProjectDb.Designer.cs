@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Project.Infrastructure;
 
@@ -10,9 +11,11 @@ using Project.Infrastructure;
 namespace Project.Infrastructure.Migrations
 {
     [DbContext(typeof(ProjectContext))]
-    partial class ProjectContextModelSnapshot : ModelSnapshot
+    [Migration("20251109092230_initProjectDb")]
+    partial class initProjectDb
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,9 +55,6 @@ namespace Project.Infrastructure.Migrations
 
                     b.Property<DateTime>("CreateTime")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<decimal>("FinMoney")
-                        .HasColumnType("decimal(65,30)");
 
                     b.Property<string>("FinPercentage")
                         .IsRequired()
@@ -113,10 +113,6 @@ namespace Project.Infrastructure.Migrations
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
 
                     b.Property<int>("Valuation")
                         .HasColumnType("int");

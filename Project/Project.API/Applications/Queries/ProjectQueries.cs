@@ -2,21 +2,63 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Dapper;
+using MySql.Data.MySqlClient;
 
 namespace Project.API.Applications.Queries
 {
     public class ProjectQueries : IProjectQueries
     {
-        public Task<dynamic> GetProjectByUserIdAsync(int userId)
+        private readonly string _connectionString;
+        public ProjectQueries(string connectionString)
         {
-            // 实现获取用户项目列表的逻辑
-            throw new NotImplementedException();
+            _connectionString = connectionString;
+        }
+        public async Task<dynamic> GetProjectByUserIdAsync(int userId)
+        {
+            using var connection = new MySqlConnection(_connectionString);
+            connection.Open();
+            var sql = @"select
+                            Projects.Id,
+                            Projects.Avatar,
+                            Projects.Company,
+                            Projects.FinStage,
+                            Projects.Introduction,
+                            Projects.ShowSecurityInfo,
+                            Projects.CreateTime 
+                            FROM Projects 
+                            where Projects.UserId = @userId";
+            var result = await connection.QueryAsync<dynamic>(sql, new { userId });
+            return result;
         }
 
-        public Task<dynamic> GetProjectDetailAsync(int userId, int projectId)
+        public async Task<dynamic> GetProjectDetailAsync(int projectId)
         {
-            // 实现获取项目详情的逻辑
-            throw new NotImplementedException();
+            using var connection = new MySqlConnection(_connectionString);
+            connection.Open();
+            var sql = @"select
+                            Projects.Company,
+                            Projects.City,
+                            Projects.AreaName,
+                            Projects.Provice,
+                            Projects.FinStage,
+                            Projects.FinMoney,
+                            Projects.Valuation,
+                            Projects.FinPercentage,
+                            Projects.Introduction,
+                            Projects.UserId,
+                            Projects.Income,
+                            Projects.Revenue,
+                            Projects.UserName,
+                            Projects.Avatar,
+                            Projects.BrokerageOptions,
+                            ProjectVisibleRules.Tags,
+                            ProjectVisibleRules.Visible
+                            FROM Projects INNER JOIN ProjectVisibleRules 
+                            on Projects.Id = ProjectVisibleRules.ProjectId
+                            where Projects.Id = @projectId";
+            var result = connection.QueryAsync<dynamic>(sql, new { projectId });
+            return result;
         }
     }
 }

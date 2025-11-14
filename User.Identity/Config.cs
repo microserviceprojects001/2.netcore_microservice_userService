@@ -25,9 +25,15 @@ public class Config
                     "contact.admin"         // 管理员权限
                 }
             },
-             new ApiResource("user_api", "user api") {
-                Scopes = { "user_api", "user_api.internal" }
-             }
+            new ApiResource("user_api", "user api") {
+                Scopes = {
+                    "user_api",
+                    "user_api.internal"
+                }
+            },
+            new ApiResource("project_api", "project api") {
+                Scopes = { "project_api" }
+            }
         };
     }
 
@@ -43,7 +49,8 @@ public class Config
             new ApiScope("contact.manage", "Manage contacts"),
             new ApiScope("contact.admin", "Admin contacts"),
             new ApiScope("user_api", "user_api scope"),
-            new ApiScope("user_api.internal", "Internal user API for service-to-service communication")
+            new ApiScope("user_api.internal", "Internal user API for service-to-service communication"),
+            new ApiScope("project_api", "project_api scope")
         };
     }
 
@@ -70,6 +77,7 @@ public class Config
                     "contact.write",        // 写入权限
                     "contact.manage",       // 管理权限
                     "contact.admin",        // 管理员权限
+                    "project_api",
                     IdentityServerConstants.StandardScopes.OpenId,
                     IdentityServerConstants.StandardScopes.Profile,
                     "role", // 直接使用字符串 "role"

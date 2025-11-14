@@ -9,6 +9,6 @@ namespace Project.API.Applications.Queries
     {
         Task<dynamic> GetProjectByUserIdAsync(int userId);
 
-        Task<dynamic> GetProjectDetailAsync(int userId, int projectId);
+        Task<dynamic> GetProjectDetailAsync(int projectId);
     }
 }
