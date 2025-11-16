@@ -4,6 +4,7 @@ using MediatR;
 using System.Runtime.Versioning;
 using Project.API.Applications.Service;
 using Project.API.Applications.Queries;
+using Project.API.Dtos;
 
 namespace Project.API.Controllers;
 
@@ -61,13 +62,22 @@ public class ProjectController : BaseController
     }
 
 
+
     [HttpPost]
     [Route("")]
-    public async Task<IActionResult> CreateProject([FromBody] Project.Domain.AggregatesModel.Project project)
+    public async Task<IActionResult> CreateProject([FromBody] CreateProjectDto createProjectDto)
     {
+        if (createProjectDto == null)
+        {
+            return BadRequest("请求数据不能为空");
+        }
+
         var command = new CreateProjectCommand
         {
-            Project = project
+            CreateProjectDto = createProjectDto,
+            UserId = UserIdentity.UserId,
+            UserName = UserIdentity.Name,
+            Avatar = UserIdentity.Avatar
         };
 
         var result = await _mediator.Send(command);

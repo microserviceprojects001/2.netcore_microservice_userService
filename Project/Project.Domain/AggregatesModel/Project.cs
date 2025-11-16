@@ -211,13 +211,88 @@ namespace Project.Domain.AggregatesModel
             return newProject;
         }
 
-        public Project()
+        private Project()
         {
             this.Viewers = new List<ProjectViewer>();
             this.Contributors = new List<ProjectContributor>();
-
-            this.AddDomainEvent(new ProjectCreatedEvent { project = this });
+            this.Properties = new List<ProjectProperty>();
+            this.CreateTime = DateTime.UtcNow;
+            this.ShowSecurityInfo = false;
         }
+
+        /// <summary>
+        /// 工厂方法 - 创建项目
+        /// </summary>
+        public static Project Create(
+            int userId,
+            string company,
+            string introduction,
+            string? avatar = null,
+            string? originBPFile = null,
+            string? formatBPFile = null,
+            string? provice = null,
+            string? city = null,
+            string? areaName = null,
+            string? finStage = null,
+            string? userName = null,
+            string? tags = null,
+            string? finPercentage = null,
+            int? provinceId = null,
+            int? cityId = null,
+            int? areaId = null,
+            decimal? finMoney = null,
+            int? income = null,
+            int? revenue = null,
+            int? valuation = null,
+            int? brokerageOptions = null,
+            bool? onPlatform = null,
+            DateTime? registerTime = null)
+        {
+            // 验证必需字段
+            if (userId <= 0)
+                throw new ArgumentException("用户ID无效", nameof(userId));
+
+            if (string.IsNullOrWhiteSpace(company))
+                throw new ArgumentException("公司名称不能为空", nameof(company));
+
+            if (string.IsNullOrWhiteSpace(introduction))
+                throw new ArgumentException("项目介绍不能为空", nameof(introduction));
+
+            var project = new Project
+            {
+                UserId = userId,
+                Company = company.Trim(),
+                Introduction = introduction.Trim(),
+                Avatar = avatar,
+                OriginBPFile = originBPFile,
+                FormatBPFile = formatBPFile,
+                Provice = provice,
+                City = city,
+                AreaName = areaName,
+                FinStage = finStage,
+                UserName = userName,
+                Tags = tags,
+                FinPercentage = finPercentage,
+                ProvinceId = provinceId ?? 0,
+                CityId = cityId ?? 0,
+                AreaId = areaId ?? 0,
+                FinMoney = finMoney ?? 0,
+                Income = income ?? 0,
+                Revenue = revenue ?? 0,
+                Valuation = valuation ?? 0,
+                BrokerageOptions = brokerageOptions ?? 0,
+                OnPlatform = onPlatform ?? false,
+                RegisterTime = registerTime ?? DateTime.MinValue
+            };
+
+            // 发布领域事件
+            project.AddDomainEvent(new ProjectCreatedEvent { project = project });
+
+            return project;
+        }
+
+        // ... rest of existing methods ...
+
         public void AddViewer(int userId, string userName, string avatar)
         {
             if (Viewers == null)
