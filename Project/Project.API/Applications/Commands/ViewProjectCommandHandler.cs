@@ -24,6 +24,11 @@ namespace Project.API.Applications.Commands
             {
                 throw new Project.Domain.Exceptions.ProjectDomainException($"Project with id {request.ProjectId} not found.");
             }
+            // 项目所有者 不能加入自己的项目
+            if (project.UserId == request.UserId)
+            {
+                throw new Project.Domain.Exceptions.ProjectDomainException($"Project owner cannot view your own project.");
+            }
             project.AddViewer(request.UserId, request.UserName, request.Avatar);
 
             await _projectRepository.UnitOfWork.SaveChangesAsync(cancellationToken);

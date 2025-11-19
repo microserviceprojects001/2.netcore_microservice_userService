@@ -25,6 +25,11 @@ namespace Project.API.Applications.Commands
             {
                 throw new Project.Domain.Exceptions.ProjectDomainException($"Project with id {request.ProjectContributor.ProjectId} not found.");
             }
+            // 项目所有者 不能加入自己的项目
+            if (project.UserId == request.ProjectContributor.UserId)
+            {
+                throw new Project.Domain.Exceptions.ProjectDomainException($"Project owner cannot join as contributor.");
+            }
             project.AddContributor(request.ProjectContributor);
 
             await _projectRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
