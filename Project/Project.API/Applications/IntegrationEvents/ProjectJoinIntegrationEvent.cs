@@ -2,16 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MediatR;
 using Project.Domain.AggregatesModel;
 
-namespace Project.Domain.Events
+namespace Project.API.Applications.IntegrationEvents
 {
-    public class ProjectViewerEvent : INotification
+    public class ProjectJoinIntegrationEvent
     {
         public string Company { get; set; }
         public string Introduction { get; set; }
+
         public string Avatar { get; set; }
-        public ProjectViewer viewer { get; set; }
+        public ProjectContributor Contributor { get; set; }
     }
 }

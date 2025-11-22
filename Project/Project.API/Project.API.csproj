@@ -10,6 +10,10 @@
     <PackageReference Include="Consul" Version="1.7.14.9" />
     <PackageReference Include="dapper" Version="2.1.66" />
     <PackageReference Include="Dapper.SqlBuilder" Version="2.1.66" />
+    <PackageReference Include="DotNetCore.CAP" Version="8.4.0" />
+    <PackageReference Include="DotNetCore.CAP.Dashboard" Version="8.4.0" />
+    <PackageReference Include="DotNetCore.CAP.MySql" Version="8.4.0" />
+    <PackageReference Include="DotNetCore.CAP.RabbitMQ" Version="8.4.0" />
     <PackageReference Include="MediatR" Version="11.1.0" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.8" />
