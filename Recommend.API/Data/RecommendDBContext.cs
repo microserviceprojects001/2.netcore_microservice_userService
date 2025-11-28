@@ -13,6 +13,7 @@ namespace Recommend.API.Data
         {
         }
 
+        public DbSet<ProjectRecommend> ProjectRecommends { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ProjectRecommend>().ToTable("ProjectRecommends")

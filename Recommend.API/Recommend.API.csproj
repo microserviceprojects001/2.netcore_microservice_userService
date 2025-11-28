@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="consul" Version="1.7.14.9" />
     <PackageReference Include="DotNetCore.CAP" Version="8.4.0" />
     <PackageReference Include="DotNetCore.CAP.Dashboard" Version="8.4.0" />
     <PackageReference Include="DotNetCore.CAP.MySql" Version="8.4.0" />
@@ -16,7 +17,12 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="polly" Version="8.6.3" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BuildingBlocks\Resilience\Resilience.csproj" />
   </ItemGroup>
 
 </Project>

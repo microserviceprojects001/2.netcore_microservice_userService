@@ -34,6 +34,19 @@ public class ContactController : BaseController
         return Ok(await _contactRepository.GetContactsAsync(UserIdentity.UserId, cancellationToken));
     }
 
+    /// <summary>
+    /// 这个是提供给 推荐服务调用的，需要网关屏蔽掉才可以
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpGet]
+    [Route("{userId}")]
+    public async Task<IActionResult> Get(int userId, CancellationToken cancellationToken)
+    {
+        return Ok(await _contactRepository.GetContactsAsync(userId, cancellationToken));
+    }
+
     [HttpPut]
     [Route("tags")]
     public async Task<IActionResult> TagContact([FromBody] TagContactInputViewModel viewModel, CancellationToken cancellationToken)

@@ -22,9 +22,14 @@ namespace Project.API.Applications.DomainEventHandlers
         {
             var @event = new ProjectCreatedIntegrationEvent
             {
-                ProjectId = notification.project.Id,
                 UserId = notification.project.UserId,
-                CreatedTime = DateTime.UtcNow
+                CreatedTime = DateTime.Now,
+                ProjectId = notification.project.Id,
+                Company = notification.project.Company,
+                Introduction = notification.project.Introduction,
+                FinStage = notification.project.FinStage,
+                ProjectAvatar = notification.project.Avatar,
+                Tags = notification.project.Tags,
             };
             _capBus.PublishAsync("finbook.projectapi.projectcreated", @event);
             // Handle the ProjectCreatedEvent here
