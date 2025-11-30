@@ -34,6 +34,9 @@ public class Config
             },
             new ApiResource("project_api", "project api") {
                 Scopes = { "project_api" }
+            },
+            new ApiResource("recommend_api", "project recommend  api") {
+                Scopes = { "recommend_api" }
             }
         };
     }
@@ -51,8 +54,9 @@ public class Config
             new ApiScope("contact.admin", "Admin contacts"),
             new ApiScope("user_api", "user_api scope"),
             new ApiScope("user_api.internal", "Internal user API for service-to-service communication"),
+            new ApiScope("contact_api.internal", "Internal contact API for service-to-service communication"),
             new ApiScope("project_api", "project_api scope"),
-            new ApiScope("contact_api.internal", "Internal contact API for service-to-service communication")
+            new ApiScope("recommend_api", "recommend_api scope"),
         };
     }
 
@@ -80,6 +84,7 @@ public class Config
                     "contact.manage",       // 管理权限
                     "contact.admin",        // 管理员权限
                     "project_api",
+                    "recommend_api",
                     IdentityServerConstants.StandardScopes.OpenId,
                     IdentityServerConstants.StandardScopes.Profile,
                     "role", // 直接使用字符串 "role"
