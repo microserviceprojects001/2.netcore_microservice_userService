@@ -6,6 +6,8 @@ using Consul;
 using Resilience;
 using Microsoft.Extensions.Options;
 using Recommend.API.Service;
+using DotNetCore.CAP;
+using Recommend.API.IntegrationEventHandlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,6 +49,31 @@ builder.Services.AddSingleton<IHttpClient>(sp =>
 });
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IContactService, ContactService>();
+
+// 添加 CAP 配置（MySQL 版本）
+builder.Services.AddCap(x =>
+{
+    x.UseEntityFramework<RecommendDBContext>();
+    var configuration = builder.Configuration;
+    x.UseRabbitMQ(option =>
+    {
+        option.HostName = configuration["RabbitMQ:HostName"];
+        option.Port = int.Parse(configuration["RabbitMQ:Port"]);
+        option.UserName = configuration["RabbitMQ:UserName"];
+        option.Password = configuration["RabbitMQ:Password"];
+        option.VirtualHost = configuration["RabbitMQ:VirtualHost"];
+
+    });
+    x.FailedRetryCount = 3;
+    x.FailedRetryInterval = 60;
+    x.UseDashboard(opt =>
+    {
+        opt.PathMatch = "/cap"; // Dashboard访问路径
+    });
+});
+builder.Services.AddScoped<ProjectCreatedIntegrationEventHandler>();
+builder.Services.AddScoped<IInternalAuthService, InternalAuthService>();
+builder.Services.Configure<ClientSettings>(builder.Configuration.GetSection("ClientSettings"));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

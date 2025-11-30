@@ -22,7 +22,8 @@ public class Config
                     "contact.read",         // 读取联系人权限
                     "contact.write",        // 写入联系人权限
                     "contact.manage",       // 管理联系人权限
-                    "contact.admin"         // 管理员权限
+                    "contact.admin",        // 管理员权限
+                    "contact_api.internal",
                 }
             },
             new ApiResource("user_api", "user api") {
@@ -50,7 +51,8 @@ public class Config
             new ApiScope("contact.admin", "Admin contacts"),
             new ApiScope("user_api", "user_api scope"),
             new ApiScope("user_api.internal", "Internal user API for service-to-service communication"),
-            new ApiScope("project_api", "project_api scope")
+            new ApiScope("project_api", "project_api scope"),
+            new ApiScope("contact_api.internal", "Internal contact API for service-to-service communication")
         };
     }
 
@@ -92,7 +94,10 @@ public class Config
                 ClientSecrets = { new Secret("contact_service_secret".Sha256()) },
                 AllowedGrantTypes = { "client_credentials" },
 
-                AllowedScopes = { "user_api.internal" }, // 只能访问user_api
+                AllowedScopes = {
+                     "user_api.internal", // 能访问user_api
+                     "contact_api.internal" // 能访问contactResource
+                },
                 RequireClientSecret = true, // 必须提供客户端密钥
                 RequirePkce = false,        // 不需要PKCE（仅用于授权码流）
                 AllowOfflineAccess = false, // 不允许离线访问（不需要刷新令牌）

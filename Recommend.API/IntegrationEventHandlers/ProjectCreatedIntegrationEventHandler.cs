@@ -18,45 +18,58 @@ namespace Recommend.API.IntegrationEventHandlers
         private readonly IUserService _userService;
         private readonly IContactService _contactService;
         private readonly RecommendDBContext _dbContext;
-        public ProjectCreatedIntegrationEventHandler(RecommendDBContext dbContext, IUserService userService,
-                                                     IContactService contactService)
+        private readonly ILogger<ProjectCreatedIntegrationEventHandler> _logger;
+        public ProjectCreatedIntegrationEventHandler(
+                RecommendDBContext dbContext,
+                IUserService userService,
+                ILogger<ProjectCreatedIntegrationEventHandler> logger,
+                IContactService contactService)
         {
             _dbContext = dbContext;
             _userService = userService;
             _contactService = contactService;
+            _logger = logger;
         }
 
         [CapSubscribe("finbook.projectapi.projectcreated")]
         public async Task Handle(ProjectCreatedIntegrationEvent @event)
         {
-            var fromUser = await _userService.GetBaseUserInfoAsync(@event.UserId);
-            var contacts = await _contactService.GetUserContactsAsync(@event.UserId);
-            foreach (var contact in contacts)
+            try
             {
-                var recommend = new ProjectRecommend
+                var fromUser = await _userService.GetBaseUserInfoAsync(@event.UserId);
+                var contacts = await _contactService.GetUserContactsAsync(@event.UserId);
+                foreach (var contact in contacts)
                 {
+                    var recommend = new ProjectRecommend
+                    {
 
-                    FromUserId = @event.UserId,
-                    Company = @event.Company,
-                    Tags = @event.Tags,
+                        FromUserId = @event.UserId,
+                        Company = @event.Company,
+                        Tags = @event.Tags ?? string.Empty, // 处理可能的空值
 
-                    ProjectId = @event.ProjectId,
-                    ProjectAvatar = @event.ProjectAvatar,
-                    FinState = @event.FinStage,
+                        ProjectId = @event.ProjectId,
+                        ProjectAvatar = @event.ProjectAvatar ?? string.Empty,
+                        FinState = @event.FinStage ?? string.Empty, // 处理可能的空值
 
-                    RecommendTime = DateTime.Now,
-                    CreatedTime = @event.CreatedTime,
+                        RecommendTime = DateTime.Now,
+                        CreatedTime = @event.CreatedTime,
 
-                    Introduction = @event.Introduction,
-                    RecommendType = EnumRecommendType.Friend,
-                    FromUserName = fromUser.Name,
-                    FromUserAvatar = fromUser.Avatar,
-                    UserId = contact.UserId,
-                };
-                _dbContext.ProjectRecommends.Add(recommend);
+                        Introduction = @event.Introduction ?? string.Empty,
+                        RecommendType = EnumRecommendType.Friend,
+                        FromUserName = fromUser.Name ?? string.Empty,
+                        FromUserAvatar = fromUser.Avatar ?? string.Empty,
+                        UserId = contact.UserId
+                    };
+                    _dbContext.ProjectRecommends.Add(recommend);
+                }
+
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation($"An error occurred, when recommend service handle projectcreated event: {ex.ToString()}");
             }
 
-            await _dbContext.SaveChangesAsync();
         }
     }
 }
