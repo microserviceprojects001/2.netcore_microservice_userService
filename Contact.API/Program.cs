@@ -12,6 +12,7 @@ using Contact.API.Infrastructure;
 using Contact.API.Configuration;
 using DotNetCore.CAP;
 using Contact.API.IntegrationEvents.EventHandling;
+using Resilience.ZipkinExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -67,14 +68,15 @@ builder.Services.AddSingleton<IConsulClient>(provider =>
 });
 
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpClient("Contact.API");
 builder.Services.AddSingleton(typeof(ResilienceClientFactory), sp =>
 {
     var logger = sp.GetRequiredService<ILogger<ResilienceHttplicent>>();
     var httpContextAccessor = sp.GetRequiredService<IHttpContextAccessor>();
     var retryCount = 5;
     var exceptionCountAllowedBeforeBreaking = 3;
-
-    return new ResilienceClientFactory(logger, httpContextAccessor, retryCount, exceptionCountAllowedBeforeBreaking);
+    var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
+    return new ResilienceClientFactory(logger, httpContextAccessor, httpClientFactory, retryCount, exceptionCountAllowedBeforeBreaking);
 });
 //注册全局单例IHttpClient
 builder.Services.AddSingleton<IHttpClient>(sp =>
@@ -169,7 +171,7 @@ builder.Services.AddCap(x =>
     });
 });
 builder.Services.AddScoped<UserProfileChangedEventHandler>();
-
+builder.Services.AddZipkinTracing(builder.Configuration);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

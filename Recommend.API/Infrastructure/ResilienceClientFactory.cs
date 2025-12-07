@@ -13,7 +13,7 @@ public class ResilienceClientFactory
 {
     private ILogger<ResilienceHttplicent> _logger;
     private IHttpContextAccessor _httpContextAccessor;
-
+    private readonly IHttpClientFactory _httpClientFactory;
     // 重试次数
     private int _retryCount = 3;
 
@@ -22,19 +22,23 @@ public class ResilienceClientFactory
     public ResilienceClientFactory(
         ILogger<ResilienceHttplicent> logger,
         IHttpContextAccessor httpContextAccessor,
+        IHttpClientFactory httpClientFactory,
         int retryCount = 3,
         int exceptionCountAllowedBeforeBreaking = 5)
     {
         _logger = logger;
         _httpContextAccessor = httpContextAccessor;
+        _httpClientFactory = httpClientFactory;
         _retryCount = retryCount;
         _exceptionCountAllowedBeforeBreaking = exceptionCountAllowedBeforeBreaking;
     }
 
     public ResilienceHttplicent GetResilienceHttplicent() => new ResilienceHttplicent(
+        "Recommend.API",
          origin => CreatePolicies(origin),
          _logger,
-         _httpContextAccessor
+         _httpContextAccessor,
+         _httpClientFactory
      );
 
     private IEnumerable<IAsyncPolicy<HttpResponseMessage>> CreatePolicies(string origin)

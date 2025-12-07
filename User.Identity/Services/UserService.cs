@@ -30,6 +30,13 @@ public class UserService : IUserService
 
     public async Task<UserInfo> CheckOrCreate(string phone)
     {
+        _logger.LogInformation("[UserService] 开始CheckOrCreate，手机号: {Phone}", phone);
+
+        // 检查当前跟踪上下文
+        var activity = System.Diagnostics.Activity.Current;
+        _logger.LogInformation("[UserService] 当前TraceId: {TraceId}",
+            activity?.TraceId.ToString() ?? "无跟踪上下文");
+
         // 从Consul获取服务地址
         var services = await _consulClient.Health.Service(_options.UserServiceName, tag: null, passingOnly: true);
         var service = services.Response.FirstOrDefault();
@@ -52,7 +59,22 @@ public class UserService : IUserService
             };
         try
         {
+            _logger.LogInformation("[UserService] 调用User.API: {Uri}", uri);
+
             var response = await _httpClient.PostAsync(uri, form);
+
+            _logger.LogInformation("[UserService] 响应状态码: {StatusCode}", response.StatusCode);
+
+            // 检查响应头中是否有跟踪信息
+            foreach (var header in response.Headers)
+            {
+                if (header.Key.StartsWith("trace") || header.Key.StartsWith("X-B3"))
+                {
+                    _logger.LogDebug("[UserService] 响应跟踪头: {Key}={Value}",
+                        header.Key, string.Join(",", header.Value));
+                }
+            }
+
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadAsStringAsync();

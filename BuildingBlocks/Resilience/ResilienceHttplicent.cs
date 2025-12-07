@@ -20,15 +20,38 @@ public class ResilienceHttplicent : IHttpClient
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public ResilienceHttplicent(
+        string name,
         Func<string, IEnumerable<IAsyncPolicy<HttpResponseMessage>>> policyCreator,
         ILogger<ResilienceHttplicent> logger,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        IHttpClientFactory httpClientFactory)
     {
-        _httpClient = new HttpClient();
-        _policyWrapperCache = new ConcurrentDictionary<string, AsyncPolicyWrap<HttpResponseMessage>>();
-        _policyCreators = policyCreator;
-        _logger = logger;
-        _httpContextAccessor = httpContextAccessor;
+        try
+        {
+            _logger = logger;
+            _logger.LogInformation("[ResilienceHttplicent] 正在创建命名HttpClient: {ClientName}", name);
+
+            _httpClient = httpClientFactory.CreateClient(name);
+
+            // 🔥 验证创建成功
+            _logger.LogInformation("[ResilienceHttplicent] HttpClient创建成功，HashCode: {HashCode}",
+                _httpClient.GetHashCode());
+
+            // 验证当前是否有Activity（跟踪上下文）
+            var activity = System.Diagnostics.Activity.Current;
+            _logger.LogInformation("[ResilienceHttplicent] 当前Activity: {ActivityId}",
+                activity?.Id ?? "无");
+
+            _policyWrapperCache = new ConcurrentDictionary<string, AsyncPolicyWrap<HttpResponseMessage>>();
+            _policyCreators = policyCreator;
+           
+            _httpContextAccessor = httpContextAccessor;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[ResilienceHttplicent] 创建HttpClient失败");
+            throw;
+        }
     }
 
     public async Task<HttpResponseMessage> PostAsync<T>(

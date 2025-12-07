@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer; // 添加这个
 using Microsoft.IdentityModel.Tokens; // 添加这个
 using System.IdentityModel.Tokens.Jwt;
 using DotNetCore.CAP;
-
+using Resilience.ZipkinExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -109,6 +109,7 @@ builder.Services.AddCap(x =>
     });
 });
 
+builder.Services.AddZipkinTracing(builder.Configuration);
 var app = builder.Build();
 
 // 初始化数据库

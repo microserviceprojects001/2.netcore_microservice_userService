@@ -10,6 +10,7 @@ using User.Identity.Infrastructure;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using User.Identity.Authentication;
+using Resilience.ZipkinExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,14 +29,15 @@ builder.Services.AddIdentityServer()
     .AddInMemoryApiScopes(Config.GetApiScopes());
 
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpClient("User.Identity");
 builder.Services.AddSingleton(typeof(ResilienceClientFactory), sp =>
 {
     var logger = sp.GetRequiredService<ILogger<ResilienceHttplicent>>();
     var httpContextAccessor = sp.GetRequiredService<IHttpContextAccessor>();
     var retryCount = 5;
     var exceptionCountAllowedBeforeBreaking = 3;
-
-    return new ResilienceClientFactory(logger, httpContextAccessor, retryCount, exceptionCountAllowedBeforeBreaking);
+    var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>(); // 获取工厂
+    return new ResilienceClientFactory(logger, httpContextAccessor, httpClientFactory, retryCount, exceptionCountAllowedBeforeBreaking);
 });
 //注册全局单例IHttpClient
 builder.Services.AddSingleton<IHttpClient>(sp =>
@@ -58,6 +60,8 @@ builder.Services.AddSingleton<IConsulClient>(provider =>
 builder.Services.AddScoped<IProfileService, ProfileService>();
 // 修改为使用应用生命周期事件注册
 builder.Services.AddSingleton<ConsulRegistrationService>();
+
+builder.Services.AddZipkinTracing(builder.Configuration);
 
 var app = builder.Build();
 
