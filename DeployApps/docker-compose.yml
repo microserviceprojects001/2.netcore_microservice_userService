@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  user-identity:
+    image: registry.cn-hangzhou.aliyuncs.com/microsoftservice/user.identity:v1
+    container_name: user-identity
+    ports:
+      - "5103:80"
+      - "7024:445"  # ✅ 根据你的配置，这是正确的
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      # 服务发现与健康检查配置
+      - ServerDiscovery__UseHttps=false
+      - ServerDiscovery__HealthCheck__Host=user-identity
+      - ServerDiscovery__HealthCheck__Port=80
+      - ServerDiscovery__HealthCheck__Path=/HealthCheck
+      - ServerDiscovery__Consul__HttpEndpoint=http://consul:8500
+    networks:
+      - elastic  # ✅ 使用 DeployCommon 定义的网络
+    restart: unless-stopped
+    # 移除 depends_on，因为 consul 在另一个 compose 文件中
+    # depends_on:
+    #   consul:
+    #     condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/HealthCheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+# 不需要 volumes 部分，因为 consul-data 在 DeployCommon 中定义
+
+networks:
+  elastic:
+    external: true  # ✅ 使用外部网络
+    name: deploycommon_elastic  # 网络名称（自动生成或指定）
