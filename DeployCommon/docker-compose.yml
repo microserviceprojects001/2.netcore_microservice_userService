@@ -138,8 +138,36 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-# 定义数据卷，数据将持久化保存在这里
-
+  # 定义数据卷，数据将持久化保存在这里
+  mysql-deploy:
+    image: mysql:latest  # 改为稳定的 8.0 版本
+    container_name: mysql-deploy
+    environment:
+      - MYSQL_ROOT_PASSWORD=acsdev312
+      - MYSQL_DATABASE=UserDB
+      - MYSQL_CHARSET=utf8mb4
+      - MYSQL_COLLATION=utf8mb4_unicode_ci
+      # 内存优化
+      - MYSQL_INNODB_BUFFER_POOL_SIZE=256M
+      - MYSQL_PERFORMANCE_SCHEMA=OFF
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql-deploy-data:/var/lib/mysql
+    networks:
+      - elastic
+    restart: unless-stopped
+    command: 
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --innodb-buffer-pool-size=256M
+    mem_limit: 1g
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -uroot -pacsdev312 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
 volumes:
   es-data1:
     driver: local
@@ -155,6 +183,12 @@ volumes:
       o: bind
   consul-data:
     driver: local
+  mysql-deploy-data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./data/mysql-deploy  # 数据持久化目录
+      o: bind
 # 定义容器使用的网络，便于彼此发现和通信
 networks:
   elastic:

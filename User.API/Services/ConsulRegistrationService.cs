@@ -49,46 +49,85 @@ public class ConsulRegistrationService
             return;
         }
 
-        _logger.LogInformation($"检测到服务器地址: {string.Join(", ", serverAddresses.Addresses)}");
+        _logger.LogInformation($"检测到所有服务器地址: {string.Join(", ", serverAddresses.Addresses)}");
 
-        foreach (var address in serverAddresses.Addresses)
+        // 获取当前环境的实际配置值
+        var useHttps = _consulConfig.UseHttps;
+        _logger.LogInformation($"UseHttps配置: {useHttps}");
+
+        // 根据 UseHttps 配置过滤要注册的地址
+        var targetScheme = useHttps ? "https" : "http";
+        var addressesToRegister = serverAddresses.Addresses
+            .Where(addr => addr.StartsWith($"{targetScheme}://"))
+            .ToList();
+
+        if (!addressesToRegister.Any())
+        {
+            _logger.LogWarning($"没有找到 {targetScheme.ToUpper()} 地址可以注册到Consul");
+            return;
+        }
+
+        _logger.LogInformation($"将注册以下 {targetScheme.ToUpper()} 地址到Consul: {string.Join(", ", addressesToRegister)}");
+
+        foreach (var address in addressesToRegister)
         {
             try
             {
-                var sanitizedAddress = address
-                    .Replace("0.0.0.0", Dns.GetHostName())
-                    .Replace("*", Dns.GetHostName())
-                    .Replace("+", Dns.GetHostName())
-                    .Replace("[::]", Dns.GetHostName());
+                var uri = new Uri(address);
+                var scheme = uri.Scheme; // http 或 https
+                var autoDetectedPort = uri.Port;
 
-                var uri = new Uri(sanitizedAddress);
-                var host = uri.Host;
-                var port = uri.Port;
+                // ========== 【核心修改】构建健康检查地址 ==========
+                string healthCheckUrl = string.Empty;
+                string serviceHost = string.Empty;
+                int servicePort = 0;
 
-                var serviceId = $"{_consulConfig.ServerName}-{host}:{port}";
+                // 如果配置中明确指定了健康检查主机和端口，则优先使用（适用于Docker）
+                if (!string.IsNullOrEmpty(_consulConfig.HealthCheck?.Host) && _consulConfig.HealthCheck.Port.HasValue)
+                {
+                    // 使用配置驱动的方式
+                    serviceHost = _consulConfig.HealthCheck.Host;
+                    servicePort = _consulConfig.HealthCheck.Port.Value;
+
+                    // Docker内部通常用HTTP，但这里使用配置的scheme或默认http
+                    var healthCheckScheme = targetScheme; // 简化：容器内部通信使用HTTP
+                    healthCheckUrl = $"{healthCheckScheme}://{serviceHost}:{servicePort}{_consulConfig.HealthCheck.Path}";
+
+                    _logger.LogInformation($"✅ 使用配置的健康检查地址: {healthCheckUrl}");
+                }
+
+                // ===============================================
+
+                // 服务ID（使用主机和端口确保唯一性）
+                var serviceId = $"{_consulConfig.ServerName}-{serviceHost}:{servicePort}";
+                _logger.LogInformation($"✅ 注册服务 Consul serviceId: {serviceId}");
                 _registeredIds.Add(serviceId);
 
-                var scheme = _consulConfig.UseHttps ? "https" : "http";
-
+                // 构建服务注册信息
                 var registration = new AgentServiceRegistration
                 {
                     ID = serviceId,
                     Name = _consulConfig.ServerName,
-                    Address = host,
-                    Port = port,
-                    Tags = _consulConfig.UseHttps ? new[] { "https" } : Array.Empty<string>(),
+                    Address = serviceHost,
+                    Port = servicePort,
+                    Tags = scheme == "https" ? new[] { "https" } : Array.Empty<string>(),
                     Check = new AgentServiceCheck
                     {
-                        HTTP = $"{scheme}://{host}:{port}/HealthCheck",
-                        Interval = TimeSpan.FromSeconds(10),
+                        HTTP = healthCheckUrl,
+                        TLSSkipVerify = true, // 开发/Docker环境可跳过证书验证
+                        Interval = TimeSpan.FromSeconds(30),
                         Timeout = TimeSpan.FromSeconds(5),
-                        DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(30)
+                        DeregisterCriticalServiceAfter = TimeSpan.FromMinutes(1)
                     }
                 };
 
                 await _consulClient.Agent.ServiceRegister(registration, cancellationToken);
                 _logger.LogInformation($"✅ 已注册服务到Consul: {serviceId}");
-                _logger.LogInformation($"   健康检查: {registration.Check.HTTP}");
+                _logger.LogInformation($"   协议: {scheme.ToUpper()}");
+                _logger.LogInformation($"   地址: {serviceHost}");
+                _logger.LogInformation($"   端口: {servicePort}");
+                _logger.LogInformation($"   健康检查: {healthCheckUrl}");
+                _logger.LogInformation($"   Consul地址: {_consulConfig.Consul?.HttpEndpoint}");
             }
             catch (Exception ex)
             {

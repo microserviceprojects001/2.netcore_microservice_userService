@@ -27,7 +27,33 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-
+  user-api:
+    image: registry.cn-hangzhou.aliyuncs.com/microsoftservice/user.api:v1
+    container_name: user-api
+    ports:
+      - "7025:80"
+      - "7025:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      # Consul服务发现配置
+      - ServerDiscovery__ConsulAddress=http://consul:8500
+      - ServerDiscovery__UserServiceName=User.API
+      - ServerDiscovery__UseHttps=false
+      # 数据库连接配置
+      - ConnectionStrings__DefaultConnection=Server=mysql-deploy;Port=3306;Database=UserDB;User=root;Password=acsdev312;Charset=utf8mb4;
+      # 其他配置
+      - ASPNETCORE_URLS=http://+:80;https://+:443
+    networks:
+      - elastic
+    depends_on:
+      mysql-deploy:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 # 不需要 volumes 部分，因为 consul-data 在 DeployCommon 中定义
 
 networks:
