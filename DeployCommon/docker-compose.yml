@@ -145,8 +145,6 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=acsdev312
       - MYSQL_DATABASE=UserDB
-      - MYSQL_CHARSET=utf8mb4
-      - MYSQL_COLLATION=utf8mb4_unicode_ci
       # 内存优化
       - MYSQL_INNODB_BUFFER_POOL_SIZE=256M
       - MYSQL_PERFORMANCE_SCHEMA=OFF
@@ -154,13 +152,20 @@ services:
       - "3308:3306"
     volumes:
       - mysql-deploy-data:/var/lib/mysql
+      # 挂载初始化脚本目录,语法：宿主机路径:容器内路径:选项
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro
+      - ./config/mysql/my.cnf:/etc/my.cnf:ro 
     networks:
       - elastic
     restart: unless-stopped
-    command: 
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-      - --innodb-buffer-pool-size=256M
+    # command: >
+    #   bash -c "
+    #   # 复制配置文件并设置正确权限
+    #   cp /tmp/my.cnf /etc/mysql/conf.d/my.cnf &&
+    #   chmod 644 /etc/mysql/conf.d/my.cnf &&
+    #   # 启动 MySQL
+    #   docker-entrypoint.sh mysqld
+    #   "
     mem_limit: 1g
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -uroot -pacsdev312 || exit 1"]

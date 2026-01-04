@@ -31,23 +31,22 @@ services:
     image: registry.cn-hangzhou.aliyuncs.com/microsoftservice/user.api:v1
     container_name: user-api
     ports:
-      - "7025:80"
-      - "7025:443"
+      - "5104:80"
+      - "7026:443"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       # Consul服务发现配置
-      - ServerDiscovery__ConsulAddress=http://consul:8500
-      - ServerDiscovery__UserServiceName=User.API
+      - ServerDiscovery__Consul__HttpEndpoint=http://consul:8500
       - ServerDiscovery__UseHttps=false
-      # 数据库连接配置
-      - ConnectionStrings__DefaultConnection=Server=mysql-deploy;Port=3306;Database=UserDB;User=root;Password=acsdev312;Charset=utf8mb4;
-      # 其他配置
-      - ASPNETCORE_URLS=http://+:80;https://+:443
+      - ServerDiscovery__HealthCheck__Host=user-api
+      - ServerDiscovery__HealthCheck__Port=80
+      - ServerDiscovery__HealthCheck__Path=/HealthCheck
+
     networks:
       - elastic
-    depends_on:
-      mysql-deploy:
-        condition: service_healthy
+    # depends_on:
+    #   mysql-deploy:
+    #     condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/health"]
