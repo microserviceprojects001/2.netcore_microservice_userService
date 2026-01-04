@@ -29,6 +29,9 @@ builder.Services.AddOpenApi();
 // MediatR 11.0 及更早版本的注册方式
 builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
 
+//阿里云的数据库
+//"MySQLProject": "Server=8.140.59.193;port=3307;Database=beta_project;User=abel;Password=acsdev312!@"
+
 var connectionString = builder.Configuration.GetConnectionString("MySQLProject");
 Console.WriteLine($"DB Server: {connectionString}");
 
