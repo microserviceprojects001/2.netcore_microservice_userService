@@ -94,6 +94,32 @@ services:
         interval: 30s
         timeout: 10s
         retries: 3
+  contact-api:
+    image: registry.cn-hangzhou.aliyuncs.com/microsoftservice/contact.api:v1
+    container_name: contact-api
+    ports:
+      - "5107:80"
+      - "7029:448"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      # Consul服务发现配置
+      - ServerDiscovery__Consul__HttpEndpoint=http://consul:8500
+      - ServerDiscovery__UseHttps=false
+      - ServerDiscovery__HealthCheck__Host=contact-api
+      - ServerDiscovery__HealthCheck__Port=80
+      - ServerDiscovery__HealthCheck__Path=/HealthCheck
+
+    networks:
+      - elastic
+    # depends_on:
+    #   mysql-deploy:
+    #     condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 networks:
   elastic:
     external: true  # ✅ 使用外部网络
