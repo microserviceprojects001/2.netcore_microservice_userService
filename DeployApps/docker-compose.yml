@@ -54,7 +54,20 @@ services:
       timeout: 10s
       retries: 3
 # 不需要 volumes 部分，因为 consul-data 在 DeployCommon 中定义
+  recommend-api:
+    image: registry.cn-hangzhou.aliyuncs.com/microsoftservice/recommend.api:v1
+    container_name: recommend-api
+    ports:
+      - "5105:80"
+      - "7027:446"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      # Consul服务发现配置
+      - ServerDiscovery__Consul__HttpEndpoint=http://consul:8500
+      - ServerDiscovery__UseHttps=false
 
+    networks:
+      - elastic
 networks:
   elastic:
     external: true  # ✅ 使用外部网络
