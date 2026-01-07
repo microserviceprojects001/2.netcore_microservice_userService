@@ -81,9 +81,27 @@ builder.Services.AddScoped<ProjectCreatedIntegrationEventHandler>();
 builder.Services.AddScoped<IInternalAuthService, InternalAuthService>();
 builder.Services.Configure<ClientSettings>(builder.Configuration.GetSection("ClientSettings"));
 
+var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+// 根据环境设置不同的 Authority
+if (environment.Equals("Production", StringComparison.OrdinalIgnoreCase))
+{
+    // 生产环境：使用 Identity Server 容器名
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.Authority = "http://user-identity"; // 容器内部通信，使用 HTTP
+            options.RequireHttpsMetadata = false; // 内部通信不需要 HTTPS
+            options.Audience = "recommend_api";
+            options.TokenValidationParameters.ValidateIssuer = true;
+            options.TokenValidationParameters.ValidIssuer = "http://user-identity";
+        });
+}
+else
+{
+    // 开发环境：使用网关地址
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.Authority = "https://localhost:5203"; // 网关地址
@@ -95,6 +113,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         //     ValidIssuer = "https://localhost:5203"
         // };
     });
+}
+
+
 builder.Services.AddZipkinTracing(builder.Configuration);
 var app = builder.Build();
 
@@ -103,8 +124,12 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+// 只在非生产环境启用 HTTPS 重定向
+if (!environment.Equals("Production", StringComparison.OrdinalIgnoreCase))
+{
+    app.UseHttpsRedirection();
+}
 
-app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 

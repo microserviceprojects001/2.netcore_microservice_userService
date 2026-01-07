@@ -52,6 +52,16 @@
             "problemMatcher": "$msCompile"
         },
         {
+            "label": "API.Gateway",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/API.Gateway/API.Gateway.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
             "label": "build-tests",
             "command": "dotnet",
             "type": "process",

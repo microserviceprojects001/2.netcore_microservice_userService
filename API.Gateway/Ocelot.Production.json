@@ -1,0 +1,179 @@
+{
+  "Routes": [
+    {
+      "DownstreamPathTemplate": "/.well-known/{catchAll}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-identity",  
+          "Port": 80               
+        }
+      ],
+      "UpstreamPathTemplate": "/.well-known/{catchAll}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/connect/{catchAll}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-identity",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/connect/{catchAll}",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+
+    {
+      "DownstreamPathTemplate": "/api/users",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-api",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/users",
+      "UpstreamHttpMethod": [ "GET", "PATCH" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "finbook",
+        "AllowedScopes": ["user_api"]
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/users/baseinfo/{userId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-api",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/users/baseinfo/{userId}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "finbook",
+        "AllowedScopes": ["user_api"]
+      }
+    },
+
+    {
+      "DownstreamPathTemplate": "/api/contacts",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "contact-api",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/contacts",
+      "UpstreamHttpMethod": [ "GET" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "finbook"
+      },
+      "RouteClaimsRequirement": {
+        "scope": "contact.read"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/contacts/tags",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "contact-api",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/contacts/tags",
+      "UpstreamHttpMethod": [ "PUT" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/contacts/apply-requests/{catchAll}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "contact-api",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/contacts/apply-requests/{catchAll}",
+      "UpstreamHttpMethod": [ "POST", "PUT" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "finbook",
+        "AllowedScopes": [ "contact_api" ]
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/contacts/apply-requests",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "contact-api",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/contacts/apply-requests",
+      "UpstreamHttpMethod": [ "GET" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "finbook",
+        "AllowedScopes": [ "contact_api" ]
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/test/client-auth/{catchAll}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "contact-api",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/contacts/test/client-auth/{catchAll}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "finbook",
+        "AllowedScopes": [ "contact_api" ]
+      }
+    },
+
+    {
+      "DownstreamPathTemplate": "/api/project",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "project-api",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/project",
+      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "finbook",
+        "AllowedScopes": [ "project_api" ]
+      }
+    },
+
+    {
+      "DownstreamPathTemplate": "/api/recommend",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "recommend-api",
+          "Port": 80
+        }
+      ],
+      "UpstreamPathTemplate": "/recommend",
+      "UpstreamHttpMethod": [ "GET" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "finbook",
+        "AllowedScopes": [ "recommend_api" ]
+      }
+    }
+  ],
+  
+  "GlobalConfiguration": {
+    "BaseUrl": "http://api-gateway:80"
+    
+  }
+}

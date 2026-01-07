@@ -22,6 +22,7 @@ public class SmsAuthCodeValidator : IExtensionGrantValidator
 
     public async Task ValidateAsync(ExtensionGrantValidationContext context)
     {
+        Console.WriteLine("已访问到ValidateAsync方法");
         // 1. 从请求获取参数
         var phone = context.Request.Raw.Get("phone");
         var code = context.Request.Raw.Get("code");

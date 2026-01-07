@@ -45,18 +45,33 @@ builder.Services.AddHealthChecks();
 
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.Authority = "https://localhost:5203"; // 网关地址
-        options.RequireHttpsMetadata = true; // 开发环境可以设为false
-        options.Audience = "user_api";
-        // options.TokenValidationParameters = new TokenValidationParameters
-        // {
-        //     ValidateIssuer = true,
-        //     ValidIssuer = "https://localhost:5203"
-        // };
-    });
+var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
+
+// 根据环境设置不同的 Authority
+if (environment.Equals("Production", StringComparison.OrdinalIgnoreCase))
+{
+    // 生产环境：使用 Identity Server 容器名
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.Authority = "http://user-identity"; // 容器内部通信，使用 HTTP
+            options.RequireHttpsMetadata = false; // 内部通信不需要 HTTPS
+            options.Audience = "user_api";
+            options.TokenValidationParameters.ValidateIssuer = true;
+            options.TokenValidationParameters.ValidIssuer = "http://user-identity";
+        });
+}
+else
+{
+    // 开发环境：使用网关地址
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.Authority = "https://localhost:5203"; // 网关地址
+            options.RequireHttpsMetadata = true;
+            options.Audience = "user_api";
+        });
+}
 
 builder.Services.AddAuthorization(options =>
 {
@@ -121,7 +136,11 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+// 只在非生产环境启用 HTTPS 重定向
+if (!environment.Equals("Production", StringComparison.OrdinalIgnoreCase))
+{
+    app.UseHttpsRedirection();
+}
 app.UseAuthentication();
 app.UseAuthorization();
 

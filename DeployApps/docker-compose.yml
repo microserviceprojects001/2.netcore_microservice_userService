@@ -120,6 +120,14 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+  api-gateway:
+    image: registry.cn-hangzhou.aliyuncs.com/microsoftservice/api.gateway:v1
+    container_name: api-gateway
+    ports:
+      - "5108:80"
+      - "7030:447"
+    networks:
+      - elastic
 networks:
   elastic:
     external: true  # ✅ 使用外部网络

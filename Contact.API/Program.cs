@@ -19,7 +19,26 @@ var builder = WebApplication.CreateBuilder(args);
 // 清除默认的声明类型映射
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
+
+// 根据环境设置不同的 Authority
+if (environment.Equals("Production", StringComparison.OrdinalIgnoreCase))
+{
+    // 生产环境：使用 Identity Server 容器名
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.Authority = "http://user-identity"; // 容器内部通信，使用 HTTP
+            options.RequireHttpsMetadata = false; // 内部通信不需要 HTTPS
+            options.Audience = "contactResource";
+            options.TokenValidationParameters.ValidateIssuer = true;
+            options.TokenValidationParameters.ValidIssuer = "http://user-identity";
+        });
+}
+else
+{
+    // 开发环境：使用网关地址
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.Authority = "https://localhost:5203"; // 需要是网关地址
@@ -32,6 +51,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         //     ValidIssuer = "https://localhost:5203"
         // };
     });
+}
 
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -180,7 +200,11 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+// 只在非生产环境启用 HTTPS 重定向
+if (!environment.Equals("Production", StringComparison.OrdinalIgnoreCase))
+{
+    app.UseHttpsRedirection();
+}
 
 // 添加认证中间件
 app.UseAuthentication(); // 必须在 UseAuthorization 之前
