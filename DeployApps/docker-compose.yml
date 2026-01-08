@@ -6,27 +6,28 @@ services:
     container_name: user-identity
     ports:
       - "5103:80"
-      - "7024:445"  # ✅ 根据你的配置，这是正确的
+      - "7024:445"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      # 服务发现与健康检查配置
       - ServerDiscovery__UseHttps=false
       - ServerDiscovery__HealthCheck__Host=user-identity
       - ServerDiscovery__HealthCheck__Port=80
       - ServerDiscovery__HealthCheck__Path=/HealthCheck
       - ServerDiscovery__Consul__HttpEndpoint=http://consul:8500
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: "localhost:24224"
+        tag: "prod.user-identity"
     networks:
-      - elastic  # ✅ 使用 DeployCommon 定义的网络
+      - microservices-network
     restart: unless-stopped
-    # 移除 depends_on，因为 consul 在另一个 compose 文件中
-    # depends_on:
-    #   consul:
-    #     condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/HealthCheck"]
       interval: 30s
       timeout: 10s
       retries: 3
+
   user-api:
     image: registry.cn-hangzhou.aliyuncs.com/microsoftservice/user.api:v1
     container_name: user-api
@@ -35,25 +36,25 @@ services:
       - "7026:443"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      # Consul服务发现配置
       - ServerDiscovery__Consul__HttpEndpoint=http://consul:8500
       - ServerDiscovery__UseHttps=false
       - ServerDiscovery__HealthCheck__Host=user-api
       - ServerDiscovery__HealthCheck__Port=80
       - ServerDiscovery__HealthCheck__Path=/HealthCheck
-
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: "localhost:24224"
+        tag: "prod.user-api"
     networks:
-      - elastic
-    # depends_on:
-    #   mysql-deploy:
-    #     condition: service_healthy
+      - microservices-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-# 不需要 volumes 部分，因为 consul-data 在 DeployCommon 中定义
+
   recommend-api:
     image: registry.cn-hangzhou.aliyuncs.com/microsoftservice/recommend.api:v1
     container_name: recommend-api
@@ -62,38 +63,43 @@ services:
       - "7027:446"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      # Consul服务发现配置
       - ServerDiscovery__Consul__HttpEndpoint=http://consul:8500
       - ServerDiscovery__UseHttps=false
-
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: "localhost:24224"
+        tag: "prod.recommend-api"
     networks:
-      - elastic
-  project-api:
-      image: registry.cn-hangzhou.aliyuncs.com/microsoftservice/project.api:v1
-      container_name: project-api
-      ports:
-        - "5106:80"
-        - "7028:447"
-      environment:
-        - ASPNETCORE_ENVIRONMENT=Production
-        # Consul服务发现配置
-        - ServerDiscovery__Consul__HttpEndpoint=http://consul:8500
-        - ServerDiscovery__UseHttps=false
-        - ServerDiscovery__HealthCheck__Host=project-api
-        - ServerDiscovery__HealthCheck__Port=80
-        - ServerDiscovery__HealthCheck__Path=/HealthCheck
+      - microservices-network
 
-      networks:
-        - elastic
-      # depends_on:
-      #   mysql-deploy:
-      #     condition: service_healthy
-      restart: unless-stopped
-      healthcheck:
-        test: ["CMD", "curl", "-f", "http://localhost/health"]
-        interval: 30s
-        timeout: 10s
-        retries: 3
+  project-api:
+    image: registry.cn-hangzhou.aliyuncs.com/microsoftservice/project.api:v1
+    container_name: project-api
+    ports:
+      - "5106:80"
+      - "7028:447"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ServerDiscovery__Consul__HttpEndpoint=http://consul:8500
+      - ServerDiscovery__UseHttps=false
+      - ServerDiscovery__HealthCheck__Host=project-api
+      - ServerDiscovery__HealthCheck__Port=80
+      - ServerDiscovery__HealthCheck__Path=/HealthCheck
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: "localhost:24224"
+        tag: "prod.project-api"
+    networks:
+      - microservices-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   contact-api:
     image: registry.cn-hangzhou.aliyuncs.com/microsoftservice/contact.api:v1
     container_name: contact-api
@@ -102,33 +108,41 @@ services:
       - "7029:448"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      # Consul服务发现配置
       - ServerDiscovery__Consul__HttpEndpoint=http://consul:8500
       - ServerDiscovery__UseHttps=false
       - ServerDiscovery__HealthCheck__Host=contact-api
       - ServerDiscovery__HealthCheck__Port=80
       - ServerDiscovery__HealthCheck__Path=/HealthCheck
-
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: "localhost:24224"
+        tag: "prod.contact-api"
     networks:
-      - elastic
-    # depends_on:
-    #   mysql-deploy:
-    #     condition: service_healthy
+      - microservices-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+
   api-gateway:
     image: registry.cn-hangzhou.aliyuncs.com/microsoftservice/api.gateway:v1
     container_name: api-gateway
     ports:
       - "5108:80"
       - "7030:447"
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: "localhost:24224"
+        tag: "prod.api-gateway"
     networks:
-      - elastic
+      - microservices-network
+    restart: unless-stopped
+
 networks:
-  elastic:
-    external: true  # ✅ 使用外部网络
-    name: deploycommon_elastic  # 网络名称（自动生成或指定）
+  microservices-network:
+    external: true
+    name: microservices-network  # 引用外部网络
