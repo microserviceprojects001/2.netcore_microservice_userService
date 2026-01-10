@@ -13,14 +13,26 @@ using Contact.API.Configuration;
 using DotNetCore.CAP;
 using Contact.API.IntegrationEvents.EventHandling;
 using Resilience.ZipkinExtensions;
+using Microservices.Common.Logging;
+using Serilog;
+
+Log.Logger = SerilogConfiguration.CreateBootstrapLogger("Contact.API");
 
 var builder = WebApplication.CreateBuilder(args);
 
+Log.Information("Starting {Application}...", "Contact.API");
+
+// 配置 Serilog
+//builder.UseMicroservicesSerilog("Contact.API");
+
+// 2. 使用公共配置配置 Serilog
+builder.Host.UseMicroservicesSerilog(
+    applicationName: "Contact.API",
+    environment: builder.Environment.EnvironmentName);
 // 清除默认的声明类型映射
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
-
 // 根据环境设置不同的 Authority
 if (environment.Equals("Production", StringComparison.OrdinalIgnoreCase))
 {

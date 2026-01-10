@@ -16,14 +16,19 @@ public class ContactController : BaseController
     private readonly IContactRepository _contactRepository;
 
     private readonly IUserService _userService;
+
+    private readonly ILogger<ContactController> _logger;
+
     public ContactController(IContactApplyRequestRepository contactApplyRequestRepository,
                                 IUserService userService,
-                                IContactRepository contactRepository)
+                                IContactRepository contactRepository,
+                                ILogger<ContactController> logger)
     {
         Console.WriteLine($"[{DateTime.Now}] ContactController 构造函数执行");
         _contactApplyRequestRepository = contactApplyRequestRepository;
         _userService = userService;
         _contactRepository = contactRepository;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -31,6 +36,8 @@ public class ContactController : BaseController
     [Authorize(Policy = "Contact.Read")]
     public async Task<IActionResult> Get(CancellationToken cancellationToken)
     {
+        _logger.LogInformation($"[{DateTime.Now}] Get 方法被调用");
+
         return Ok(await _contactRepository.GetContactsAsync(UserIdentity.UserId, cancellationToken));
     }
 
