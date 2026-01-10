@@ -16,8 +16,22 @@ using Microsoft.IdentityModel.Tokens; // 添加这个
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.Extensions.Options;
 using DotNetCore.CAP;
+using Microservices.Common.Logging;
+using Serilog;
+
+Log.Logger = SerilogConfiguration.CreateBootstrapLogger("Project.API");
 
 var builder = WebApplication.CreateBuilder(args);
+
+Log.Information("Starting {Application}...", "Project.API");
+
+// 配置 Serilog
+//builder.UseMicroservicesSerilog("Contact.API");
+
+// 2. 使用公共配置配置 Serilog
+builder.Host.UseMicroservicesSerilog(
+    applicationName: "Project.API",
+    environment: builder.Environment.EnvironmentName);
 
 // Add services to the container.
 

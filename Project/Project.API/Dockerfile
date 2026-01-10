@@ -6,6 +6,7 @@ WORKDIR /src
 COPY Project/Project.API/Project.API.csproj ./Project/Project.API/
 COPY Project/Project.Domain/Project.Domain.csproj ./Project/Project.Domain/
 COPY Project/Project.Infrastructure/Project.Infrastructure.csproj ./Project/Project.Infrastructure/
+COPY BuildingBlocks/Resilience/Resilience.csproj ./BuildingBlocks/Resilience/
 # 2. 恢复依赖
 WORKDIR /src/Project/Project.API
 RUN dotnet restore
@@ -18,6 +19,7 @@ COPY Project/Project.API/ ./Project/Project.API/
 # 复制Resilience源代码
 COPY Project/Project.Domain/ ./Project/Project.Domain/
 COPY Project/Project.Infrastructure/ ./Project/Project.Infrastructure/
+COPY BuildingBlocks/Resilience/ ./BuildingBlocks/Resilience/
 
 # 4. 清理所有obj/bin目录（避免编译冲突）
 RUN find /src -name "obj" -type d -exec rm -rf {} + || true

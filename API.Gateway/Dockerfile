@@ -4,7 +4,7 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build-env
 # 1. 设置工作目录并复制项目文件
 WORKDIR /src
 COPY API.Gateway/API.Gateway.csproj ./API.Gateway/
-
+COPY BuildingBlocks/Resilience/Resilience.csproj ./BuildingBlocks/Resilience/
 
 # 2. 恢复依赖
 WORKDIR /src/API.Gateway
@@ -14,7 +14,7 @@ RUN dotnet restore
 WORKDIR /src
 # 复制API.Gateway源代码
 COPY API.Gateway/ ./API.Gateway/
-
+COPY BuildingBlocks/Resilience/ ./BuildingBlocks/Resilience/
 
 
 # 4. 清理所有obj/bin目录（避免编译冲突）

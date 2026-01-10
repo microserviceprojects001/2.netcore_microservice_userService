@@ -1,7 +1,23 @@
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
+using Microservices.Common.Logging;
+using Serilog;
+
+Log.Logger = SerilogConfiguration.CreateBootstrapLogger("API.Gateway");
 
 var builder = WebApplication.CreateBuilder(args);
+
+Log.Information("Starting {Application}...", "API.Gateway");
+
+// 配置 Serilog
+//builder.UseMicroservicesSerilog("Contact.API");
+
+// 2. 使用公共配置配置 Serilog
+builder.Host.UseMicroservicesSerilog(
+    applicationName: "API.Gateway",
+    environment: builder.Environment.EnvironmentName);
+
+
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

@@ -11,8 +11,23 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using User.Identity.Authentication;
 using Resilience.ZipkinExtensions;
+using Microservices.Common.Logging;
+using Serilog;
+
+Log.Logger = SerilogConfiguration.CreateBootstrapLogger("User.Identity");
 
 var builder = WebApplication.CreateBuilder(args);
+
+Log.Information("Starting {Application}...", "User.Identity");
+
+// 配置 Serilog
+//builder.UseMicroservicesSerilog("Contact.API");
+
+// 2. 使用公共配置配置 Serilog
+builder.Host.UseMicroservicesSerilog(
+    applicationName: "User.Identity",
+    environment: builder.Environment.EnvironmentName);
+
 
 // Add services to the container.
 

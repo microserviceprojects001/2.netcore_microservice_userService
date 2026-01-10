@@ -12,9 +12,22 @@ using Microsoft.AspNetCore.Authentication.JwtBearer; // 添加这个
 using Microsoft.IdentityModel.Tokens; // 添加这个
 using System.IdentityModel.Tokens.Jwt;
 using Resilience.ZipkinExtensions;
+using Microservices.Common.Logging;
+using Serilog;
 
+Log.Logger = SerilogConfiguration.CreateBootstrapLogger("Recommend.API");
 
 var builder = WebApplication.CreateBuilder(args);
+
+Log.Information("Starting {Application}...", "Recommend.API");
+
+// 配置 Serilog
+//builder.UseMicroservicesSerilog("Contact.API");
+
+// 2. 使用公共配置配置 Serilog
+builder.Host.UseMicroservicesSerilog(
+    applicationName: "Recommend.API",
+    environment: builder.Environment.EnvironmentName);
 
 // Add services to the container.
 
