@@ -79,7 +79,7 @@ public class MongoContactRepository : IContactRepository
         var contactIds = contactBook.Contacts.Select(c => c.UserId);
         var filter = Builders<ContactBook>.Filter.And
         (
-            Builders<ContactBook>.Filter.In(c => c.UserId, contactIds),
+            Builders<ContactBook>.Filter.In(c => c.UserId, contactIds), // 找到其他用户的通讯录，这些通讯录中包含了要更新的用户
             Builders<ContactBook>.Filter.ElemMatch(c => c.Contacts, c => c.UserId == userInfo.UserId)
         );
 

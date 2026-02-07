@@ -27,7 +27,7 @@ namespace Recommend.API.Service
           IOptions<ServerDiscoveryConfig> options,
           ILogger<ContactService> logger,
           IHttpContextAccessor httpContextAccessor,
-           IInternalAuthService internalAuthService)
+          IInternalAuthService internalAuthService)
         {
             _httpClient = httpClient;
             _consulClient = consulClient;
@@ -57,8 +57,13 @@ namespace Recommend.API.Service
             try
             {
                 // 从 HTTP 上下文中获取 token
+                //
                 var authorizationHeader = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].ToString();
                 string authorizationToken = await _internalAuthService.GetServiceTokenAsync();
+                _logger.LogInformation($"Completed GetContactsByUserIdAsync with userID: {userId}");
+
+                _logger.LogInformation($"Calling GetContactsByUserIdAsync with URI: {uri} and Token: {authorizationToken}");
+
                 var response = await _httpClient.GetStringAsync(uri, authorizationToken);
                 if (string.IsNullOrEmpty(response))
                 {

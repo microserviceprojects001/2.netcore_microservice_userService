@@ -117,7 +117,7 @@ builder.Services.AddSingleton<IHttpClient>(sp =>
     return sp.GetRequiredService<ResilienceClientFactory>().GetResilienceHttplicent();
 });
 // client token service test
-//builder.Services.AddScoped<IServiceTokenProvider, ServiceTokenProvider>();
+//builder.Services.AddScoped<IServiceTokenProvider, ServiceTokenProvider>(); // 没用上这个
 builder.Services.AddScoped<IClientAuthTestService, ClientAuthTestService>();
 // ... existing code ...
 
